@@ -15,11 +15,11 @@ readme = "./README.md"
 repository = "https://github.com/lovesegfault/chirp"
 
 [dependencies]
-thiserror = "1.0.9"
-pixels = "0.0.2"
-structopt = "0.3.7"
-log = "0.4.8"
 env_logger = "0.7.1"
+log = "0.4.8"
+# pixels = "0.0.2"
+structopt = "0.3.7"
+thiserror = "1.0.9"
 
 [profile.release]
 opt-level = 3
