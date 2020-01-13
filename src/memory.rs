@@ -1,7 +1,17 @@
+use std::convert::TryFrom;
 use std::fmt;
-use std::io;
+use std::io::{self, prelude::*};
 
-const MEMORY_SIZE: usize = 4096;
+#[derive(Debug, thiserror::Error)]
+pub enum MemoryError {
+    #[error("Failed to read game file into memory")]
+    LoadGameFile(#[from] io::Error),
+    #[error("Failed to open game file")]
+    OpenGameFile(std::path::PathBuf),
+}
+
+const MEMORY_SIZE: usize = 0x1000;
+const MEMORY_START: usize = 0x200; // The first 512 bytes were reserved for the CHIP-8 interpreter
 
 #[derive(Debug)]
 pub struct Memory {
@@ -39,6 +49,32 @@ impl io::Write for Memory {
     fn flush(&mut self) -> io::Result<()> {
         // NOOP, since this is just a Vec
         Ok(())
+    }
+}
+
+impl TryFrom<std::fs::File> for Memory {
+    type Error = MemoryError;
+    fn try_from(mut f: std::fs::File) -> Result<Self, Self::Error> {
+        let mut memory = Memory::default();
+        f.read(&mut memory.memory[MEMORY_START..])
+            .map_err(|e| MemoryError::LoadGameFile(e))?;
+        Ok(memory)
+    }
+}
+
+impl TryFrom<&std::path::Path> for Memory {
+    type Error = MemoryError;
+    fn try_from(p: &std::path::Path) -> Result<Self, Self::Error> {
+        let f = std::fs::File::open(p).map_err(|_| MemoryError::OpenGameFile(p.to_path_buf()))?;
+        Memory::try_from(f)
+    }
+}
+
+impl TryFrom<&str> for Memory {
+    type Error = MemoryError;
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        let p = std::path::Path::new(s);
+        Memory::try_from(p)
     }
 }
 
