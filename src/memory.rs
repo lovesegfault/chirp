@@ -5,9 +5,9 @@ use std::io::{self, prelude::*};
 #[derive(Debug, thiserror::Error)]
 pub enum MemoryError {
     #[error("Failed to read game file into memory")]
-    LoadGameFile(#[from] io::Error),
+    LoadGameFile(#[source] io::Error),
     #[error("Failed to open game file")]
-    OpenGameFile(std::path::PathBuf),
+    OpenGameFile(#[source] io::Error),
 }
 
 const MEMORY_SIZE: usize = 0x1000;
@@ -65,7 +65,7 @@ impl TryFrom<std::fs::File> for Memory {
 impl TryFrom<&std::path::Path> for Memory {
     type Error = MemoryError;
     fn try_from(p: &std::path::Path) -> Result<Self, Self::Error> {
-        let f = std::fs::File::open(p).map_err(|_| MemoryError::OpenGameFile(p.to_path_buf()))?;
+        let f = std::fs::File::open(p).map_err(|e| MemoryError::OpenGameFile(e))?;
         Memory::try_from(f)
     }
 }
