@@ -72,4 +72,8 @@ impl Memory {
         // by taking care of wrapping
         unsafe { self.memory.get_unchecked_mut(masked_idx) }
     }
+
+    pub fn dump(&self) {
+        println!("{}", self)
+    }
 }
