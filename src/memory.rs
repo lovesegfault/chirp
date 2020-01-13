@@ -64,7 +64,7 @@ impl From<&[u8]> for Memory {
 impl TryFrom<std::fs::File> for Memory {
     type Error = MemoryError;
     fn try_from(mut f: std::fs::File) -> Result<Self, Self::Error> {
-        let mut memory = Memory::default();
+        let mut memory = Self::default();
         f.read(&mut memory.memory[MEMORY_START..])
             .map_err(MemoryError::LoadGameFile)?;
         Ok(memory)
