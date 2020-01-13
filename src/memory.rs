@@ -66,7 +66,7 @@ impl TryFrom<std::fs::File> for Memory {
     fn try_from(mut f: std::fs::File) -> Result<Self, Self::Error> {
         let mut memory = Memory::default();
         f.read(&mut memory.memory[MEMORY_START..])
-            .map_err(|e| MemoryError::LoadGameFile(e))?;
+            .map_err(MemoryError::LoadGameFile)?;
         Ok(memory)
     }
 }
@@ -74,7 +74,7 @@ impl TryFrom<std::fs::File> for Memory {
 impl TryFrom<&std::path::Path> for Memory {
     type Error = MemoryError;
     fn try_from(p: &std::path::Path) -> Result<Self, Self::Error> {
-        let f = std::fs::File::open(p).map_err(|e| MemoryError::OpenGameFile(e))?;
+        let f = std::fs::File::open(p).map_err(MemoryError::OpenGameFile)?;
         Memory::try_from(f)
     }
 }
