@@ -7,7 +7,7 @@ pub enum MemoryError {
     #[error("Failed to read game file into memory")]
     LoadFile(#[source] io::Error),
     #[error("Failed to open game file")]
-    OpenGameFile(#[source] io::Error),
+    OpenFile(#[source] io::Error),
 }
 
 const MEMORY_SIZE: usize = 0x1000;
@@ -74,7 +74,7 @@ impl TryFrom<std::fs::File> for Memory {
 impl TryFrom<&std::path::Path> for Memory {
     type Error = MemoryError;
     fn try_from(p: &std::path::Path) -> Result<Self, Self::Error> {
-        let f = std::fs::File::open(p).map_err(MemoryError::OpenGameFile)?;
+        let f = std::fs::File::open(p).map_err(MemoryError::OpenFile)?;
         Memory::try_from(f)
     }
 }
