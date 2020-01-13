@@ -53,6 +53,14 @@ impl io::Write for Memory {
     }
 }
 
+impl From<&[u8]> for Memory {
+    fn from(buf: &[u8]) -> Self {
+        let mut memory = Self::default();
+        memory.write(buf);
+        memory
+    }
+}
+
 impl TryFrom<std::fs::File> for Memory {
     type Error = MemoryError;
     fn try_from(mut f: std::fs::File) -> Result<Self, Self::Error> {
