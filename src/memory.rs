@@ -34,15 +34,16 @@ impl fmt::Display for Memory {
 
 impl io::Write for Memory {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        // Make sure we write at most MEMORY_SIZE bytes
+        // Make sure we write at most MEMORY_SIZE - MEMORY_START bytes
         let buf_len = buf.len();
-        let data_length = if buf_len < MEMORY_SIZE {
+        let writeable_size = MEMORY_SIZE - MEMORY_START;
+        let data_length = if buf_len < writeable_size {
             buf_len
         } else {
-            MEMORY_SIZE
+            writeable_size
         };
 
-        self.memory[0..data_length].copy_from_slice(buf);
+        self.memory[MEMORY_START..data_length].copy_from_slice(buf);
         Ok(data_length)
     }
 
