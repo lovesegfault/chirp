@@ -10,7 +10,6 @@ edition = "2018"
 homepage = "https://github.com/lovesegfault/chirp"
 keywords = [ "chip-8", "chip", "8", "emulator", "game" ]
 license = "BSD-3-Clause"
-maintenance = { status = "actively-developed" }
 readme = "./README.md"
 repository = "https://github.com/lovesegfault/chirp"
 
