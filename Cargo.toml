@@ -17,6 +17,7 @@ repository = "https://github.com/lovesegfault/chirp"
 env_logger = "0.7.1"
 log = "0.4.8"
 # pixels = "0.0.2"
+hexyl = "0.6.0"
 structopt = "0.3.7"
 thiserror = "1.0.9"
 
