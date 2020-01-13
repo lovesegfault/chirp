@@ -8,6 +8,8 @@ pub enum MemoryError {
     LoadFile(#[source] io::Error),
     #[error("Failed to open game file")]
     OpenFile(#[source] io::Error),
+    #[error("Out of bounds memory access at position {0}")]
+    OutOfBoundsAccess(usize),
 }
 
 #[derive(Debug)]
@@ -93,7 +95,6 @@ impl Default for Memory {
 impl Memory {
     const MEMORY_SIZE: usize = 0x1000;
     const MEMORY_START: usize = 0x200; // The first 512 bytes were reserved for the CHIP-8 interpreter
-    const MEMORY_RANGE: std::ops::Range<usize> = Self::MEMORY_START..Self::MEMORY_SIZE;
 
     pub fn new() -> Self {
         Self {
@@ -101,22 +102,25 @@ impl Memory {
         }
     }
 
-    fn mask(&self, idx: usize) -> usize {
-        idx % Self::MEMORY_SIZE
+    #[inline]
+    fn check_idx(idx: usize) -> Result<usize, MemoryError> {
+        if !(Self::MEMORY_START..Self::MEMORY_SIZE).contains(&idx) {
+            Err(MemoryError::OutOfBoundsAccess(idx))
+        } else {
+            Ok(idx)
+        }
     }
 
-    pub fn get(&self, idx: usize) -> &u8 {
-        let masked_idx = self.mask(idx);
-        // This is always safe because the call to `self.mask` enforces that the index is in bounds
-        // by taking care of wrapping
-        unsafe { self.memory.get_unchecked(masked_idx) }
+    pub fn get(&self, idx: usize) -> Result<&u8, MemoryError> {
+        let idx = Self::check_idx(idx)?;
+        // This is guaranteed to be safe beause of the call to check_idx
+        Ok(unsafe { self.memory.get_unchecked(idx) })
     }
 
-    pub fn get_mut(&mut self, idx: usize) -> &mut u8 {
-        let masked_idx = self.mask(idx);
-        // This is always safe because the call to `self.mask` enforces that the index is in bounds
-        // by taking care of wrapping
-        unsafe { self.memory.get_unchecked_mut(masked_idx) }
+    pub fn get_mut(&mut self, idx: usize) -> Result<&mut u8, MemoryError> {
+        let idx = Self::check_idx(idx)?;
+        // This is guaranteed to be safe beause of the call to check_idx
+        Ok(unsafe { self.memory.get_unchecked_mut(idx) })
     }
 
     pub fn dump(&self) {
