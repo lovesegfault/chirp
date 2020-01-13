@@ -10,9 +10,6 @@ pub enum MemoryError {
     OpenFile(#[source] io::Error),
 }
 
-const MEMORY_SIZE: usize = 0x1000;
-const MEMORY_START: usize = 0x200; // The first 512 bytes were reserved for the CHIP-8 interpreter
-
 #[derive(Debug)]
 pub struct Memory {
     memory: Vec<u8>,
@@ -36,14 +33,14 @@ impl io::Write for Memory {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         // Make sure we write at most MEMORY_SIZE - MEMORY_START bytes
         let buf_len = buf.len();
-        let writeable_size = MEMORY_SIZE - MEMORY_START;
+        let writeable_size = Self::MEMORY_SIZE - Self::MEMORY_START;
         let data_length = if buf_len < writeable_size {
             buf_len
         } else {
             writeable_size
         };
 
-        self.memory[MEMORY_START..data_length].copy_from_slice(buf);
+        self.memory[Self::MEMORY_START..data_length].copy_from_slice(buf);
         Ok(data_length)
     }
 
@@ -65,7 +62,7 @@ impl TryFrom<std::fs::File> for Memory {
     type Error = MemoryError;
     fn try_from(mut f: std::fs::File) -> Result<Self, Self::Error> {
         let mut memory = Self::default();
-        f.read(&mut memory.memory[MEMORY_START..])
+        f.read(&mut memory.memory[Self::MEMORY_START..])
             .map_err(MemoryError::LoadFile)?;
         Ok(memory)
     }
@@ -94,14 +91,17 @@ impl Default for Memory {
 }
 
 impl Memory {
+    const MEMORY_SIZE: usize = 0x1000;
+    const MEMORY_START: usize = 0x200; // The first 512 bytes were reserved for the CHIP-8 interpreter
+
     pub fn new() -> Self {
-        Memory {
-            memory: vec![0; MEMORY_SIZE],
+        Self {
+            memory: vec![0; Self::MEMORY_SIZE],
         }
     }
 
     fn mask(&self, idx: usize) -> usize {
-        idx % MEMORY_SIZE
+        idx % Self::MEMORY_SIZE
     }
 
     pub fn get(&self, idx: usize) -> &u8 {
