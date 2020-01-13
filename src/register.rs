@@ -1,5 +1,5 @@
 /// The register bank for a CHIP-8 CPU
-// I wish there was a name for the set of registers in a CPU
+// XXX: I wish there was a name for the set of registers in a CPU
 pub struct Register {
     /// Chip-8 has 16 general purpose 8-bit registers, usually referred to as Vx, where x is a
     /// hexadecimal digit (0 through F).
