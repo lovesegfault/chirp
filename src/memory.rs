@@ -93,6 +93,7 @@ impl Default for Memory {
 impl Memory {
     const MEMORY_SIZE: usize = 0x1000;
     const MEMORY_START: usize = 0x200; // The first 512 bytes were reserved for the CHIP-8 interpreter
+    const MEMORY_RANGE: std::ops::Range<usize> = Self::MEMORY_START..Self::MEMORY_SIZE;
 
     pub fn new() -> Self {
         Self {
