@@ -77,3 +77,8 @@ impl Memory {
         println!("{}", self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::memory::*;
+}
