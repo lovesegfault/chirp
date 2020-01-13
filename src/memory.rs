@@ -5,7 +5,7 @@ use std::io::{self, prelude::*};
 #[derive(Debug, thiserror::Error)]
 pub enum MemoryError {
     #[error("Failed to read game file into memory")]
-    LoadGameFile(#[source] io::Error),
+    LoadFile(#[source] io::Error),
     #[error("Failed to open game file")]
     OpenGameFile(#[source] io::Error),
 }
@@ -66,7 +66,7 @@ impl TryFrom<std::fs::File> for Memory {
     fn try_from(mut f: std::fs::File) -> Result<Self, Self::Error> {
         let mut memory = Self::default();
         f.read(&mut memory.memory[MEMORY_START..])
-            .map_err(MemoryError::LoadGameFile)?;
+            .map_err(MemoryError::LoadFile)?;
         Ok(memory)
     }
 }
