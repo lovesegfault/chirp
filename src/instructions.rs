@@ -50,37 +50,26 @@ pub enum Instruction {
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x00EE` | `RET`   | Return from a subroutine                |            |
-    // The interpreter sets the program counter to the address at the top of the stack, then
-    // subtracts 1 from the stack pointer
     Ret,
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x1KKK` | `JP`    | Jump to location `KKK`                  |            |
-    // The interpreter sets the program counter to KKK
     Jp(u16),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x2KKK` | `CALL`  | Call subroutine at `KKK`                |            |
-    // The interpreter increments the stack pointer, then puts the current PC on the top of the
-    // stack. The PC is then set to KKK
     Call(u16),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x3XKK` | `SE`    | Skip next instruction if `V[X] = KK`    |            |
-    // The interpreter compares register V[X] to KK, and if they are equal, increments the program
-    // counter by 2
     Sei(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x4XKK` | `SNE`   | Skip next instruction if `V[X] != KK`   |            |
-    // The interpreter compares register V[X] to KK, and if they are not equal, increments the
-    // program counter by 2
-    Sne(u8, u8),
+    Snei(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x5XY0` | `SE`    | Skip next instruction if `V[X] = V[Y]`  |            |
-    // The interpreter compares register V[X] to register V[Y], and if they are equal, increments
-    // the program counter by 2.
     Se(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
@@ -97,53 +86,48 @@ pub enum Instruction {
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x8XY1` | `OR`    | Set V[X] = V[X] OR V[Y]                 |            |
-    // Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. A bitwise OR
-    // compares the corresponding bits from two values, and if either bit is 1, then the same bit
-    // in the result is also 1. Otherwise, it is 0.
     Or(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x8XY2` | `AND`   | Set V[X] = V[X] AND V[Y]                |            |
-    // Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. A bitwise
-    // AND compares the corrseponding bits from two values, and if both bits are 1, then the same
-    // bit in the result is also 1. Otherwise, it is 0.
     And(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x8XY3` | `XOR`   | Set V[X] = V[X] XOR V[Y]                |            |
-    // Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx.
-    // An exclusive OR compares the corrseponding bits from two values, and if the bits are not
-    // both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
     Xor(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x8XY4` | `ADD`   | Set V[X] = V[X] + V[Y], VF = carry      |            |
-    // The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., >
-    // 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored
-    // in Vx.
     Add(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x8XY5` | `SUB`   | Set V[X] = V[X] - V[Y], VF = not borrow |            |
-    // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results
-    // stored in Vx.
     Sub(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x8XY6` | `SHR`   | Set V[X] = V[X] SHR 1, VF = carry       |            |
-    // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is
-    // divided by 2.
     Shr(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x8XY7` | `SUBN`  | Set Vx = Vy - Vx, set VF = not borrow   |            |
-    // If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results
-    // stored in Vx.
     Subn(u8, u8),
     /// | OpCode   | Name    | Op                                      | Notes      |
     /// | -------- | ------- | --------------------------------------- | ---------- |
     /// | `0x8XYE` | `SHL`   | Set V[X] = V[X] SHL 1, VF = carry       |            |
-    // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is
-    // multiplied by 2.
     Shl(u8, u8),
+    /// | OpCode   | Name    | Op                                      | Notes      |
+    /// | -------- | ------- | --------------------------------------- | ---------- |
+    /// | `0x9XY0` | `SNE`   | Skip next instruction if `V[X] != V[Y]` |            |
+    Sne(u8, u8),
+    LdI(u8),
+    Jpi(u8),
+    Rnd(u8, u8),
+    Drw(u8, u8, u8),
+    Skp(u8),
+    Sknp(u8),
+    LdVDT(u8),
+    LdK(u8),
+    LdDTV(u8),
+    LdSTV(u8),
+    AddI(u8),
 }
