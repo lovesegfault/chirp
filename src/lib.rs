@@ -1,2 +1,2 @@
 #![allow(unused, dead_code)]
-mod memory;
+pub mod memory;
