@@ -228,7 +228,7 @@ impl From<Instruction> for OpCode {
     fn from(i: Instruction) -> Self {
         use Instruction::*;
         match i {
-            Sys(addr) => OpCode(0x0 | addr),
+            Sys(addr) => OpCode(addr),
             ScrollDown(k) => OpCode(0x00C0 | (k as u16)),
             ScrollRight => OpCode(0x00FB),
             ScrollLeft => OpCode(0x00FC),
