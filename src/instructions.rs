@@ -229,6 +229,12 @@ impl From<Instruction> for OpCode {
         use Instruction::*;
         match i {
             Sys(addr) => OpCode(0x0 | addr),
+            ScrollDown(k) => OpCode(0x00C0 | (k as u16)),
+            ScrollRight => OpCode(0x00FB),
+            ScrollLeft => OpCode(0x00FC),
+            Exit => OpCode(0x00FD),
+            LowRes => OpCode(0x00FE),
+            HighRes => OpCode(0x00FF),
             _ => todo!(),
         }
     }
