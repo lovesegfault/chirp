@@ -7,10 +7,10 @@
 /// sprite data, it should be padded so any instructions following it will be properly situated in
 /// RAM.
 ///
-/// | Symbol   | Width (bits) | Addressing Mode |
-/// |:--------:|:------------:|:---------------:|
-/// | `x`, `y` | 4            | Register        |
-/// | `k`...   | 4 * `k`      | Immediate       |
+/// | Symbol   | Width (bits) |
+/// |:--------:|:------------:|
+/// | `x`, `y` | 4            |
+/// | `k`...   | 4 * `k`      |
 ///
 /// | OpCode   | ASM                  | Op                                                                        |
 /// | -------- | -------------------- | ------------------------------------------------------------------------- |
