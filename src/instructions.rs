@@ -221,3 +221,15 @@ pub enum Instruction {
     /// | `Fx65`   | `LD Vx, [I]`         | Read registers V0 through Vx from memory starting at location I           |
     LoadMemIntoV(u8),
 }
+
+pub struct OpCode(u16);
+
+impl From<Instruction> for OpCode {
+    fn from(i: Instruction) -> Self {
+        use Instruction::*;
+        match i {
+            Sys(addr) => OpCode(0x0 | addr),
+            _ => todo!(),
+        }
+    }
+}
