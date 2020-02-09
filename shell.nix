@@ -12,13 +12,13 @@ let
       "rust-std"
       "rust-src"
   ];
-  ruststable = stable.rust.override { extensions = extensions; };
+  rustStable = stable.rust.override { extensions = extensions; };
 in
   with nixpkgs;
   mkShell {
     name = "chirp";
     buildInputs = [
-      ruststable
+      rustStable
       cargo-edit
     ];
   }
