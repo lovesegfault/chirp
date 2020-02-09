@@ -18,7 +18,8 @@ in
   mkShell {
     name = "chirp";
     buildInputs = [
-      rustStable
       cargo-edit
+      hexyl
+      rustStable
     ];
   }
