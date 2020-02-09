@@ -56,6 +56,7 @@
 ///! | `Fx55`   | `LD [I], Vx`         | Store registers V0 through Vx in memory starting at location I            |
 ///! | `Fx65`   | `LD Vx, [I]`         | Read registers V0 through Vx from memory starting at location I           |
 use bitvec::prelude::*;
+use std::fmt;
 
 pub enum Instruction {
     /// | OpCode   | ASM                  | Op                                                                        |
@@ -220,7 +221,14 @@ pub enum Instruction {
     LoadMemIntoV(u8),
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct OpCode(u16);
+
+impl fmt::Debug for OpCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:#06X}", self.0)
+    }
+}
 
 macro_rules! opcode {
     ($o:expr, $nnn:ident) => {{
