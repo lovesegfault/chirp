@@ -60,10 +60,6 @@ use bitvec::prelude::*;
 pub enum Instruction {
     /// | OpCode   | ASM                  | Op                                                                        |
     /// | -------- | -------------------- | ------------------------------------------------------------------------- |
-    /// | `0kkk`   | `SYS addr`           | Jump to a machine code routine at `kkk` [DEPRECATED]                      |
-    Sys(u16),
-    /// | OpCode   | ASM                  | Op                                                                        |
-    /// | -------- | -------------------- | ------------------------------------------------------------------------- |
     /// | `00Ck`   | `SCD`                | Scroll down `k` lines                                                     |
     ScrollDown(u8),
     /// | OpCode   | ASM                  | Op                                                                        |
@@ -224,65 +220,111 @@ pub enum Instruction {
     LoadMemIntoV(u8),
 }
 
-pub struct OpCode(BitVec<Msb0, u16>);
+pub struct OpCode(u16);
 
-impl OpCode {
-    pub fn nibbles(a: u8, b: u8, c: u8, d: u8) -> Self {
-        let mut bv = BitVec::<Msb0, u16>::new();
-        bv.reserve(16);
-        bv[0..4].store(a);
-        bv[4..8].store(b);
-        bv[8..12].store(c);
-        bv[12..16].store(d);
-        Self(bv)
-    }
+macro_rules! opcode {
+    ($o:expr, $nnn:ident) => {{
+        let mut opcode: u16 = 0x0;
+        opcode.bits_mut::<Msb0>()[0..4].store($o as u8);
+        opcode.bits_mut::<Msb0>()[4..16].store($nnn as u16);
+        OpCode(opcode)
+    }};
+    ($o:expr, $n:ident, $nn:ident) => {{
+        let mut opcode: u16 = 0x0;
+        opcode.bits_mut::<Msb0>()[0..4].store($o as u8);
+        opcode.bits_mut::<Msb0>()[4..8].store($n as u8);
+        opcode.bits_mut::<Msb0>()[8..16].store($nn as u8);
+        OpCode(opcode)
+    }};
+    ($om:expr, $nm:ident, $nl:ident, $ol:expr) => {{
+        let mut opcode: u16 = 0x0;
+        opcode.bits_mut::<Msb0>()[0..4].store($om as u8);
+        opcode.bits_mut::<Msb0>()[4..8].store($nm as u8);
+        opcode.bits_mut::<Msb0>()[8..12].store($nl as u8);
+        opcode.bits_mut::<Msb0>()[12..16].store($ol as u8);
+        OpCode(opcode)
+    }};
+    ($om:expr, $nm:ident, $n:ident, $nl:ident) => {{
+        let mut opcode: u16 = 0x0;
+        opcode.bits_mut::<Msb0>()[0..4].store($om as u8);
+        opcode.bits_mut::<Msb0>()[4..8].store($nm as u8);
+        opcode.bits_mut::<Msb0>()[8..12].store($n as u8);
+        opcode.bits_mut::<Msb0>()[12..16].store($nl as u8);
+        OpCode(opcode)
+    }};
+    ($om:expr, $n:ident, $ol:expr) => {{
+        let mut opcode: u16 = 0x0;
+        opcode.bits_mut::<Msb0>()[0..4].store($om as u8);
+        opcode.bits_mut::<Msb0>()[4..8].store($n as u8);
+        opcode.bits_mut::<Msb0>()[8..16].store($ol as u8);
+        OpCode(opcode)
+    }};
+    ($oo:expr, $nn:ident) => {{
+        let mut opcode: u16 = 0x0;
+        opcode.bits_mut::<Msb0>()[0..8].store($oo as u8);
+        opcode.bits_mut::<Msb0>()[8..16].store($nn as u8);
+        OpCode(opcode)
+    }};
+    ($ooo:expr, $n:ident) => {{
+        let mut opcode: u16 = 0x0;
+        opcode.bits_mut::<Msb0>()[0..12].store($ooo as u16);
+        opcode.bits_mut::<Msb0>()[12..16].store($n as u8);
+        OpCode(opcode)
+    }};
+    ($oooo:expr) => {{
+        let mut opcode: u16 = 0x0;
+        opcode.bits_mut::<Msb0>()[0..16].store($oooo as u16);
+        OpCode(opcode)
+    }};
 }
 
 impl From<Instruction> for OpCode {
     fn from(i: Instruction) -> Self {
         use Instruction::*;
         match i {
-            Sys(addr) => todo!(),
-            ScrollDown(k) => todo!(),
-            ScrollRight => todo!(),
-            ScrollLeft => todo!(),
-            Exit => todo!(),
-            LowRes => todo!(),
-            HighRes => todo!(),
-            ClearScreen => todo!(),
-            Return => todo!(),
-            Jump(addr) => todo!(),
-            Call(addr) => todo!(),
-            SkipEqualImmediate(vx, byte) => todo!(),
-            SkipNotEqualImediate(vx, byte) => todo!(),
-            SkipEqual(vx, vy) => todo!(),
-            LoadImmediate(vx, byte) => todo!(),
-            AddImmediate(vx, byte) => todo!(),
-            Load(vx, vy) => todo!(),
-            Or(vx, vy) => todo!(),
-            And(vx, vy) => todo!(),
-            Xor(vx, vy) => todo!(),
-            Add(vx, vy) => todo!(),
-            Sub(vx, vy) => todo!(),
-            ShiftRight(vx, vy) => todo!(),
-            SubNumeric(vx, vy) => todo!(),
-            ShiftLeft(vx, vy) => todo!(),
-            SkipNotEqual(vx, vy) => todo!(),
-            LoadI(addr) => todo!(),
-            JumpImmediate(addr) => todo!(),
-            Random(vx, addr) => todo!(),
-            Draw(vx, vy, nibble) => todo!(),
-            SkipOnKey(vx) => todo!(),
-            SkipNotOnKey(vx) => todo!(),
-            LoadDTIntoV(vx) => todo!(),
-            LoadKey(vx) => todo!(),
-            LoadVIntoDT(vx) => todo!(),
-            LoadVIntoST(vx) => todo!(),
-            AddI(vx) => todo!(),
-            LoadSpriteIntoI(vx) => todo!(),
-            LoadBCDIntoI(vx) => todo!(),
-            LoadVIntoMem(vx) => todo!(),
-            LoadMemIntoV(vx) => todo!(),
+            ScrollDown(k) => opcode!(0x00C, k),
+            ScrollRight => opcode!(0x00FB),
+            ScrollLeft => opcode!(0x00FC),
+            Exit => opcode!(0x00FD),
+            LowRes => opcode!(0x00FE),
+            HighRes => opcode!(0x00FF),
+            ClearScreen => opcode!(0x00E0),
+            Return => opcode!(0x00E0),
+            Jump(addr) => opcode!(0x1, addr),
+            Call(addr) => opcode!(0x2, addr),
+            SkipEqualImmediate(vx, byte) => opcode!(0x3, vx, byte),
+            SkipNotEqualImediate(vx, byte) => opcode!(0x4, vx, byte),
+            SkipEqual(vx, vy) => opcode!(0x5, vx, vy, 0x0),
+            LoadImmediate(vx, byte) => opcode!(0x6, vx, byte),
+            AddImmediate(vx, byte) => opcode!(0x7, vx, byte),
+            Load(vx, vy) => opcode!(0x8, vx, vy, 0x0),
+            Or(vx, vy) => opcode!(0x8, vx, vy, 0x1),
+            And(vx, vy) => opcode!(0x8, vx, vy, 0x2),
+            Xor(vx, vy) => opcode!(0x8, vx, vy, 0x3),
+            Add(vx, vy) => opcode!(0x8, vx, vy, 0x4),
+            Sub(vx, vy) => opcode!(0x8, vx, vy, 0x5),
+            ShiftRight(vx, vy) => opcode!(0x8, vx, vy, 0x6),
+            SubNumeric(vx, vy) => opcode!(0x8, vx, vy, 0x7),
+            ShiftLeft(vx, vy) => opcode!(0x8, vx, vy, 0xE),
+            SkipNotEqual(vx, vy) => opcode!(0x9, vx, vy, 0x0),
+            LoadI(addr) => opcode!(0xA, addr),
+            JumpImmediate(addr) => opcode!(0xB, addr),
+            Random(vx, addr) => opcode!(0xC, vx, addr),
+            Draw(vx, vy, nibble) => opcode!(0xD, vx, vy, nibble),
+            SkipOnKey(vx) => opcode!(0xE, vx, 0x9E),
+            SkipNotOnKey(vx) => opcode!(0xE, vx, 0xA1),
+            LoadDTIntoV(vx) => opcode!(0xF, vx, 0x07),
+            LoadKey(vx) => opcode!(0xF, vx, 0x0A),
+            LoadVIntoDT(vx) => opcode!(0xF, vx, 0x15),
+            LoadVIntoST(vx) => opcode!(0xf, vx, 0x18),
+            AddI(vx) => opcode!(0xF, vx, 0x1E),
+            LoadSpriteIntoI(vx) => opcode!(0xF, vx, 0x29),
+            LoadBCDIntoI(vx) => opcode!(0xF, vx, 0x33),
+            LoadVIntoMem(vx) => opcode!(0xF, vx, 0x55),
+            LoadMemIntoV(vx) => opcode!(0xF, vx, 0x65),
         }
     }
 }
+
+#[cfg(test)]
+mod tests {}
