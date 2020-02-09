@@ -275,8 +275,8 @@ macro_rules! opcode {
     }};
     ($ooo:expr, $n:ident) => {{
         let mut opcode: u16 = 0x0;
-        opcode.bits_mut::<Msb0>()[0..12].store($ooo as u16);
-        opcode.bits_mut::<Msb0>()[12..16].store($n as u8);
+        opcode.bits_mut::<Msb0>()[0..12].store_be($ooo as u16);
+        opcode.bits_mut::<Msb0>()[12..16].store_be($n as u8);
         OpCode(opcode)
     }};
     ($oooo:expr) => {{
@@ -335,4 +335,13 @@ impl From<Instruction> for OpCode {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use crate::instructions::{Instruction, OpCode};
+    #[test]
+    fn test_scroll_down() {
+        let int = Instruction::ScrollDown(8);
+        let op: OpCode = int.into();
+        let expected = OpCode(0x00C8);
+        assert_eq!(expected, op);
+    }
+}
