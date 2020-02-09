@@ -15,10 +15,12 @@ repository = "https://github.com/lovesegfault/chirp"
 
 [dependencies]
 # env_logger = "0.7.1"
-log = "0.4.8"
+# minifb = "0.15.3"
 # pixels = "0.0.2"
-hexyl = "0.6.0"
 # structopt = "0.3.7"
+bitvec = "0.17.2"
+hexyl = "0.6.0"
+log = "0.4.8"
 thiserror = "1.0.10"
 
 [profile.release]
