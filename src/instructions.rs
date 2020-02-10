@@ -55,6 +55,7 @@
 ///! | `Fx33`   | `LD B, Vx`           | Store BCD representation of Vx in memory locations I, I+1, and I+2        |
 ///! | `Fx55`   | `LD [I], Vx`         | Store registers V0 through Vx in memory starting at location I            |
 ///! | `Fx65`   | `LD Vx, [I]`         | Read registers V0 through Vx from memory starting at location I           |
+use crate::opcode::OpCode;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, PartialOrd, Ord)]
 pub enum Instruction {
@@ -218,4 +219,46 @@ pub enum Instruction {
     /// | -------- | -------------------- | ------------------------------------------------------------------------- |
     /// | `Fx65`   | `LD Vx, [I]`         | Read registers V0 through Vx from memory starting at location I           |
     LoadMemIntoV(u8),
+}
+
+impl From<OpCode> for Instruction {
+    fn from(opcode: OpCode) -> Self {
+        use bitvec::prelude::*;
+        use Instruction::*;
+
+        match opcode[12..16].load::<u8>() {
+            0x0 => match opcode[4..12].load::<u8>() {
+                0x0C => ScrollDown(opcode[0..4].load::<u8>()),
+                0x0F => match opcode[0..4].load::<u8>() {
+                    0xB => ScrollRight,
+                    0xC => ScrollLeft,
+                    0xD => Exit,
+                    0xE => LowRes,
+                    0xF => HighRes,
+                    _ => todo!(),
+                },
+                0x0E => match opcode[0..4].load::<u8>() {
+                    0x0 => ClearScreen,
+                    0xE => Return,
+                    _ => todo!(),
+                },
+                _ => todo!(),
+            },
+            0x1 => Jump(opcode[0..12].load::<u16>()),
+            _ => todo!(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{instructions::Instruction, opcode::OpCode};
+
+    #[test]
+    fn test_scroll_down() {
+        let op = OpCode::new(0x00CA);
+        let int: Instruction = op.into();
+        let expected = Instruction::ScrollDown(0xA);
+        assert_eq!(expected, int);
+    }
 }

@@ -28,6 +28,10 @@ impl IndexMut<Range<usize>> for OpCode {
 }
 
 impl OpCode {
+    pub fn new(opcode: u16) -> Self {
+        OpCode(opcode)
+    }
+
     pub fn bits(&self) -> &BitSlice<Lsb0, u16> {
         self.0.bits::<Lsb0>()
     }
@@ -140,7 +144,7 @@ mod tests {
     macro_rules! test_int {
         ($int:expr, $val:expr) => {
             let op: OpCode = $int.into();
-            let expected = OpCode($val);
+            let expected = OpCode::new($val);
 
             assert_eq!(expected, op);
         };
