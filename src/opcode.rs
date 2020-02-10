@@ -49,9 +49,9 @@ impl OpCode {
     }
     pub fn oxoo(o: u8, x: u8, oo: u8) -> Self {
         let mut opcode = Self::default();
-        opcode[8..16].store(oo);
-        opcode[4..8].store(x);
-        opcode[0..4].store(o);
+        opcode[12..16].store(o);
+        opcode[8..12].store(x);
+        opcode[0..8].store(oo);
         opcode
     }
     pub fn oxyo(om: u8, x: u8, y: u8, ol: u8) -> Self {
@@ -100,7 +100,7 @@ impl From<Instruction> for OpCode {
             Jump(addr) => OpCode::okkk(0x1, addr),
             Call(addr) => OpCode::okkk(0x2, addr),
             SkipEqualImmediate(vx, byte) => OpCode::oxkk(0x3, vx, byte),
-            SkipNotEqualImediate(vx, byte) => OpCode::oxkk(0x4, vx, byte),
+            SkipNotEqualImmediate(vx, byte) => OpCode::oxkk(0x4, vx, byte),
             SkipEqual(vx, vy) => OpCode::oxyo(0x5, vx, vy, 0x0),
             LoadImmediate(vx, byte) => OpCode::oxkk(0x6, vx, byte),
             AddImmediate(vx, byte) => OpCode::oxkk(0x7, vx, byte),
@@ -135,12 +135,10 @@ impl From<Instruction> for OpCode {
 
 #[cfg(test)]
 mod tests {
-    use crate::{instructions::Instruction, opcode::OpCode};
+    use crate::{instructions::Instruction::*, opcode::OpCode};
 
     macro_rules! test_int {
         ($int:expr, $val:expr) => {
-            use crate::instructions::Instruction::*;
-
             let op: OpCode = $int.into();
             let expected = OpCode($val);
 
@@ -196,5 +194,155 @@ mod tests {
     #[test]
     fn test_call() {
         test_int!(Call(0x0ABC), 0x2ABC);
+    }
+
+    #[test]
+    fn test_skip_equal_immediate() {
+        test_int!(SkipEqualImmediate(0x0A, 0xBC), 0x3ABC);
+    }
+
+    #[test]
+    fn test_skip_not_equal_immediate() {
+        test_int!(SkipNotEqualImmediate(0x0A, 0xBC), 0x4ABC);
+    }
+
+    #[test]
+    fn test_skip_equal() {
+        test_int!(SkipEqual(0x0A, 0x0B), 0x5AB0);
+    }
+
+    #[test]
+    fn test_load_immediate() {
+        test_int!(LoadImmediate(0x0A, 0xBC), 0x6ABC);
+    }
+
+    #[test]
+    fn test_add_immediate() {
+        test_int!(AddImmediate(0x0A, 0xBC), 0x7ABC);
+    }
+
+    #[test]
+    fn test_load() {
+        test_int!(Load(0x0A, 0x0B), 0x8AB0);
+    }
+
+    #[test]
+    fn test_or() {
+        test_int!(Or(0x0A, 0x0B), 0x8AB1);
+    }
+
+    #[test]
+    fn test_and() {
+        test_int!(And(0x0A, 0x0B), 0x8AB2);
+    }
+
+    #[test]
+    fn test_xor() {
+        test_int!(Xor(0x0A, 0x0B), 0x8AB3);
+    }
+
+    #[test]
+    fn test_add() {
+        test_int!(Add(0x0A, 0x0B), 0x8AB4);
+    }
+
+    #[test]
+    fn test_sub() {
+        test_int!(Sub(0x0A, 0x0B), 0x8AB5);
+    }
+
+    #[test]
+    fn test_shift_right() {
+        test_int!(ShiftRight(0x0A, 0x0B), 0x8AB6);
+    }
+
+    #[test]
+    fn test_sub_numeric() {
+        test_int!(SubNumeric(0x0A, 0x0B), 0x8AB7);
+    }
+
+    #[test]
+    fn test_shift_left() {
+        test_int!(ShiftLeft(0x0A, 0x0B), 0x8ABE);
+    }
+
+    #[test]
+    fn test_skip_not_equal() {
+        test_int!(SkipNotEqual(0x0A, 0x0B), 0x9AB0);
+    }
+
+    #[test]
+    fn test_load_i() {
+        test_int!(LoadI(0x0ABC), 0xAABC);
+    }
+
+    #[test]
+    fn test_jump_immediate() {
+        test_int!(JumpImmediate(0x0ABC), 0xBABC);
+    }
+
+    #[test]
+    fn test_random() {
+        test_int!(Random(0x0A, 0xBC), 0xCABC);
+    }
+
+    #[test]
+    fn test_draw() {
+        test_int!(Draw(0x0A, 0x0B, 0x0C), 0xDABC);
+    }
+
+    #[test]
+    fn test_skip_on_key() {
+        test_int!(SkipOnKey(0x0A), 0xEA9E);
+    }
+
+    #[test]
+    fn test_skip_not_on_key() {
+        test_int!(SkipNotOnKey(0x0A), 0xEAA1);
+    }
+
+    #[test]
+    fn test_load_dt_into_v() {
+        test_int!(LoadDTIntoV(0x0A), 0xFA07);
+    }
+
+    #[test]
+    fn test_load_key() {
+        test_int!(LoadKey(0x0A), 0xFA0A);
+    }
+
+    #[test]
+    fn test_load_v_into_dt() {
+        test_int!(LoadVIntoDT(0x0A), 0xFA15);
+    }
+
+    #[test]
+    fn test_load_v_into_st() {
+        test_int!(LoadVIntoST(0x0A), 0xFA18);
+    }
+
+    #[test]
+    fn test_add_i() {
+        test_int!(AddI(0x0A), 0xFA1E);
+    }
+
+    #[test]
+    fn test_load_sprite_into_i() {
+        test_int!(LoadSpriteIntoI(0x0A), 0xFA29);
+    }
+
+    #[test]
+    fn test_load_bcd_into_i() {
+        test_int!(LoadBCDIntoI(0x0A), 0xFA33);
+    }
+
+    #[test]
+    fn test_load_v_into_mem() {
+        test_int!(LoadVIntoMem(0x0A), 0xFA55);
+    }
+
+    #[test]
+    fn test_load_mem_into_v() {
+        test_int!(LoadMemIntoV(0x0A), 0xFA65);
     }
 }

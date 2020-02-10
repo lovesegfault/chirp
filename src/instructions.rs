@@ -105,7 +105,7 @@ pub enum Instruction {
     /// | OpCode   | ASM                  | Op                                                                        |
     /// | -------- | -------------------- | ------------------------------------------------------------------------- |
     /// | `4xkk`   | `SNE Vx, byte`       | Skip next instruction if `Vx != kk`                                       |
-    SkipNotEqualImediate(u8, u8),
+    SkipNotEqualImmediate(u8, u8),
     /// | OpCode   | ASM                  | Op                                                                        |
     /// | -------- | -------------------- | ------------------------------------------------------------------------- |
     /// | `5xy0`   | `SE Vx, Vy`          | Skip next instruction if `Vx = Vy`                                        |
