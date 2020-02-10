@@ -245,6 +245,20 @@ impl From<OpCode> for Instruction {
                 _ => todo!(),
             },
             0x1 => Jump(opcode[0..12].load::<u16>()),
+            0x2 => Call(opcode[0..12].load::<u16>()),
+            0x3 => SkipEqualImmediate(opcode[8..12].load::<u8>(), opcode[0..8].load::<u8>()),
+            0x4 => SkipNotEqualImmediate(opcode[8..12].load::<u8>(), opcode[0..8].load::<u8>()),
+            0x5 => match opcode[0..4].load::<u8>() {
+                0x0 => SkipEqual(opcode[4..8].load::<u8>(), opcode[8..12].load::<u8>()),
+                _ => todo!(),
+            },
+            0x6 => LoadImmediate(opcode[8..12].load::<u8>(), opcode[0..8].load::<u8>()),
+            0x7 => AddImmediate(opcode[8..12].load::<u8>(), opcode[0..8].load::<u8>()),
+            0x8 => match opcode[0..4].load::<u8>() {
+                0x0 => Load(opcode[8..12].load::<u8>(), opcode[4..8].load::<u8>()),
+                0x1 => Or(opcode[8..12].load::<u8>(), opcode[4..8].load::<u8>()),
+                _ => todo!(),
+            },
             _ => todo!(),
         }
     }
