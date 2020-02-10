@@ -137,75 +137,64 @@ impl From<Instruction> for OpCode {
 mod tests {
     use crate::{instructions::Instruction, opcode::OpCode};
 
+    macro_rules! test_int {
+        ($int:expr, $val:expr) => {
+            use crate::instructions::Instruction::*;
+
+            let op: OpCode = $int.into();
+            let expected = OpCode($val);
+
+            assert_eq!(expected, op);
+        };
+    }
+
     #[test]
     fn test_scroll_down() {
-        let int = Instruction::ScrollDown(0xA);
-        let op: OpCode = int.into();
-        let expected = OpCode(0x00CA);
-        assert_eq!(expected, op);
+        test_int!(ScrollDown(0xA), 0x00CA);
     }
 
     #[test]
     fn test_scroll_right() {
-        let int = Instruction::ScrollRight;
-        let op: OpCode = int.into();
-        let expected = OpCode(0x00FB);
-        assert_eq!(expected, op);
+        test_int!(ScrollRight, 0x00FB);
     }
 
     #[test]
     fn test_scroll_left() {
-        let int = Instruction::ScrollLeft;
-        let op: OpCode = int.into();
-        let expected = OpCode(0x00FC);
-        assert_eq!(expected, op);
+        test_int!(ScrollLeft, 0x00FC);
     }
 
     #[test]
     fn test_exit() {
-        let int = Instruction::Exit;
-        let op: OpCode = int.into();
-        let expected = OpCode(0x00FD);
-        assert_eq!(expected, op);
+        test_int!(Exit, 0x00FD);
     }
 
     #[test]
     fn test_low_res() {
-        let int = Instruction::LowRes;
-        let op: OpCode = int.into();
-        let expected = OpCode(0x00FE);
-        assert_eq!(expected, op);
+        test_int!(LowRes, 0x00FE);
     }
 
     #[test]
     fn test_high_res() {
-        let int = Instruction::HighRes;
-        let op: OpCode = int.into();
-        let expected = OpCode(0x00FF);
-        assert_eq!(expected, op);
+        test_int!(HighRes, 0x00FF);
     }
 
     #[test]
     fn test_clear_screen() {
-        let int = Instruction::ClearScreen;
-        let op: OpCode = int.into();
-        let expected = OpCode(0x00E0);
-        assert_eq!(expected, op);
+        test_int!(ClearScreen, 0x00E0);
     }
 
     #[test]
     fn test_return() {
-        let int = Instruction::Return;
-        let op: OpCode = int.into();
-        let expected = OpCode(0x00EE);
-        assert_eq!(expected, op);
+        test_int!(Return, 0x00EE);
     }
 
     #[test]
     fn test_jump() {
-        let int = Instruction::Jump(0x0ABC);
-        let op: OpCode = int.into();
-        let expected = OpCode(0x1ABC);
-        assert_eq!(expected, op);
+        test_int!(Jump(0x0ABC), 0x1ABC);
+    }
+
+    #[test]
+    fn test_call() {
+        test_int!(Call(0x0ABC), 0x2ABC);
     }
 }
