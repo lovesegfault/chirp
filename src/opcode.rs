@@ -16,15 +16,25 @@ impl fmt::Debug for OpCode {
 
 impl Index<Range<usize>> for OpCode {
     type Output = BitSlice<Lsb0, u16>;
+    #[inline]
     fn index(&self, range: Range<usize>) -> &Self::Output {
-        &self.bits()[range]
+        &self.0.bits::<Lsb0>()[range]
     }
 }
 
 impl IndexMut<Range<usize>> for OpCode {
+    #[inline]
     fn index_mut(&mut self, range: Range<usize>) -> &mut Self::Output {
-        &mut self.bits_mut()[range]
+        &mut self.0.bits_mut::<Lsb0>()[range]
     }
+}
+
+macro_rules! opcode {
+    ($a:expr) => {{
+        let mut opcode = OpCode::default();
+        opcode[0..16].store($a as u16);
+        opcode
+    }};
 }
 
 impl OpCode {
@@ -32,25 +42,30 @@ impl OpCode {
         OpCode(opcode)
     }
 
-    pub fn bits(&self) -> &BitSlice<Lsb0, u16> {
-        self.0.bits::<Lsb0>()
-    }
-
-    pub fn bits_mut(&mut self) -> &mut BitSlice<Lsb0, u16> {
-        self.0.bits_mut::<Lsb0>()
-    }
-
+    #[inline]
     pub fn oooo(oooo: u16) -> Self {
         let mut opcode = Self::default();
         opcode[0..16].store(oooo);
         opcode
     }
+
+    #[inline]
     pub fn oook(ooo: u16, k: u8) -> Self {
         let mut opcode = Self::default();
         opcode[4..16].store(ooo);
         opcode[0..4].store(k);
         opcode
     }
+
+    #[inline]
+    pub fn okkk(o: u8, kkk: u16) -> Self {
+        let mut opcode = Self::default();
+        opcode[12..16].store(o);
+        opcode[0..12].store(kkk);
+        opcode
+    }
+
+    #[inline]
     pub fn oxoo(o: u8, x: u8, oo: u8) -> Self {
         let mut opcode = Self::default();
         opcode[12..16].store(o);
@@ -58,6 +73,17 @@ impl OpCode {
         opcode[0..8].store(oo);
         opcode
     }
+
+    #[inline]
+    pub fn oxkk(o: u8, x: u8, kk: u8) -> Self {
+        let mut opcode = Self::default();
+        opcode[12..16].store(o);
+        opcode[8..12].store(x);
+        opcode[0..8].store(kk);
+        opcode
+    }
+
+    #[inline]
     pub fn oxyo(om: u8, x: u8, y: u8, ol: u8) -> Self {
         let mut opcode = Self::default();
         opcode[12..16].store(om);
@@ -66,19 +92,8 @@ impl OpCode {
         opcode[0..4].store(ol);
         opcode
     }
-    pub fn okkk(o: u8, kkk: u16) -> Self {
-        let mut opcode = Self::default();
-        opcode[12..16].store(o);
-        opcode[0..12].store(kkk);
-        opcode
-    }
-    pub fn oxkk(o: u8, x: u8, kk: u8) -> Self {
-        let mut opcode = Self::default();
-        opcode[12..16].store(o);
-        opcode[8..12].store(x);
-        opcode[0..8].store(kk);
-        opcode
-    }
+
+    #[inline]
     pub fn oxyk(o: u8, x: u8, y: u8, k: u8) -> Self {
         let mut opcode = Self::default();
         opcode[12..16].store(o);
@@ -94,7 +109,7 @@ impl From<Instruction> for OpCode {
         use Instruction::*;
         match i {
             ScrollDown(k) => OpCode::oook(0x00C, k),
-            ScrollRight => OpCode::oooo(0x00FB),
+            ScrollRight => opcode!(0x00FB),
             ScrollLeft => OpCode::oooo(0x00FC),
             Exit => OpCode::oooo(0x00FD),
             LowRes => OpCode::oooo(0x00FE),
